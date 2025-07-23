@@ -22,12 +22,10 @@ public class SyntheticThreadFactory implements ThreadFactory {
         thread.setName(namePrefix + threadNumber.getAndIncrement());
         thread.setDaemon(true);
         thread.setPriority(Thread.NORM_PRIORITY);
-        thread.setUncaughtExceptionHandler((t, e) -> {
-            log.error("Uncaught exception in thread {}: {}",
-                    t.getName(),
-                    e.getMessage(),
-                    e);
-        });
+        thread.setUncaughtExceptionHandler((t, e) -> log.error("Uncaught exception in thread {}: {}",
+                t.getName(),
+                e.getMessage(),
+                e));
         log.info("Created new thread: {}",
                 thread.getName());
         return thread;
