@@ -25,33 +25,33 @@
 Запустим много запросов для проверки
 заполнения очереди:
 
-![Postman](/img/img.png)
+![Postman](bishop-prototype/img/img.png)
 
 Видим, что есть успешные ответы и
 ответы с ошибкой 429 - переполнение очереди:
 
-![Postman](/img/img_1.png)
+![Postman](bishop-prototype/img/img_1.png)
 
 Рассмотрим тело ответа подробнее: 
 
 Видим подробную информацию в ответе,
 сформированную в стартере
 
-![Postman](/img/img_2.png)
+![Postman](bishop-prototype/img/img_2.png)
 
 Попробуем отправить дефолтный
 запрос с ошибкой в теле запроса -
 нам приходит подробный ответ со статусом 400
 
-![Postman](/img/img_3.png)
+![Postman](bishop-prototype/img/img_3.png)
 
 Рассмотрим успешное выполнение запроса:
 
 В IDE выводится log сообщения
 
-![Postman](/img/img_4.png)
+![Postman](bishop-prototype/img/img_4.png)
 
-![IDE](/img/img_5.png)
+![IDE](bishop-prototype/img/img_5.png)
 
 Посмотрим, как сообщение выглядит в kafka.
 
@@ -60,17 +60,17 @@
 Сообщение попадает в kafka в удобном
 для чтения формате
 
-![Kafka](/img/img_6.png)
+![Kafka](bishop-prototype/img/img_6.png)
 
 Рассмотрим метрики. Изучить кастомные метрики
-можем с помощью grafana, на базе prometheus.
+можем с помощью grafana, на базе prometheus. 
 
 Можем видеть количество
 выполненных тасков андроидом и
 количество активных андроидов
-![Grafana](/img/img_7.png)
+![Grafana](bishop-prototype/img/img_7.png)
 
 На данном изображении видем, что у каждого
 андроида отдельно отслеживается
 число выполненных команд
-![Grafana](/img/img_8.png)
+![Grafana](bishop-prototype/img/img_8.png)
