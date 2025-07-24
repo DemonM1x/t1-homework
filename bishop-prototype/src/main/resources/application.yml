@@ -31,13 +31,13 @@ management:
     web:
       exposure:
         include:
-          - health #status of application
-          - metrics #metrics list
-          - prometheus #metrics in prometheus format
-          - env #properties and variables
-          - info #CVS info
-          - heapdump #get heapdump
-          - threaddump #get threaddump
+          - health
+          - metrics
+          - prometheus
+          - env
+          - info
+          - heapdump
+          - threaddump
 
   info:
     java:
