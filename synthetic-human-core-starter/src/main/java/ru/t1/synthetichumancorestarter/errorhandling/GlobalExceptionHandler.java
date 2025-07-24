@@ -22,6 +22,11 @@ public class GlobalExceptionHandler {
         return createErrorResponse(HttpStatus.BAD_REQUEST, e, "Invalid command fields");
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ErrorResponse handleArgumentException(IllegalArgumentException e) {
+        return createErrorResponse(HttpStatus.BAD_REQUEST, e, "Invalid command arguments");
+    }
+
     @ExceptionHandler(QueueIsFullException.class)
     public ErrorResponse handleQueueIsFullException(QueueIsFullException e) {
         return createErrorResponse(HttpStatus.TOO_MANY_REQUESTS, e, "Android can't execute too many commands. Queue is full");

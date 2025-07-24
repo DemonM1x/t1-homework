@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class SyntheticThreadFactory implements ThreadFactory {
 
-    private final AtomicInteger threadNumber = new AtomicInteger(1); // Счётчик для уникальных имён
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
 
     public SyntheticThreadFactory(String namePrefix) {
