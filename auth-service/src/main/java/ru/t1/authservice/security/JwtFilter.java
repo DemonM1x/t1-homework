@@ -9,12 +9,17 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.util.Collection;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -42,8 +47,20 @@ public class JwtFilter extends OncePerRequestFilter {
             if (username != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+                    List<String> roles = jwtService.extractRoles(jwt);
+                    Collection<? extends GrantedAuthority> authorities;
+                    
+                    if (roles != null && !roles.isEmpty()) {
+                        authorities = roles.stream()
+                                .map(SimpleGrantedAuthority::new)
+                                .map(GrantedAuthority.class::cast)
+                                .toList();
+                    } else {
+                        authorities = userDetails.getAuthorities();
+                    }
+                    
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-                            null, userDetails.getAuthorities());
+                            null, authorities);
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }

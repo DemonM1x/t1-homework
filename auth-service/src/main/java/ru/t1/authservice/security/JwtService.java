@@ -4,18 +4,19 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import ru.t1.authservice.model.AccessTokenEntity;
 import ru.t1.authservice.model.RefreshTokenEntity;
+import ru.t1.authservice.model.UserEntity;
 import ru.t1.authservice.repository.AccessTokenRepository;
 import ru.t1.authservice.repository.RefreshTokenRepository;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 @Service
 public class JwtService {
@@ -26,30 +27,58 @@ public class JwtService {
     @Value("${security.jwt.refresh_toke_expiration}")
     private long REFRESH_TOKEN_EXPIRATION;
 
-    private AccessTokenRepository accessTokenRepository;
-    private RefreshTokenRepository refreshTokenRepository;
+    private final AccessTokenRepository accessTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public JwtService() throws Exception {
+    public JwtService(AccessTokenRepository accessTokenRepository, RefreshTokenRepository refreshTokenRepository) throws Exception {
+        this.accessTokenRepository = accessTokenRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public String generateAccessToken(String username) {
-        return Jwts.builder()
-                .subject(username)
+    public String generateAccessToken(UserEntity user) {
+        List<String> roles = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        String accessToken = Jwts.builder()
+                .subject(user.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .claim("type", "access")
+                .claim("roles", roles)
                 .signWith(privateKey)
                 .compact();
+
+        AccessTokenEntity accessTokenEntity = AccessTokenEntity.builder()
+                .id(user.getUsername())
+                .accessToken(new ArrayList<>())
+                .build();
+        accessTokenEntity.getAccessToken().add(accessToken);
+        accessTokenRepository.save(accessTokenEntity);
+        return accessToken;
     }
 
-    public String generateRefreshToken(String username) {
-        return Jwts.builder()
-                .subject(username)
+    public String generateRefreshToken(UserEntity user) {
+        List<String> roles = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        String refreshToken = Jwts.builder()
+                .subject(user.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .claim("type", "refresh")
+                .claim("roles", roles)
                 .signWith(privateKey)
                 .compact();
+
+        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findById(user.getUsername())
+                .orElse(RefreshTokenEntity.builder()
+                        .id(user.getUsername())
+                .refreshToken(refreshToken)
+                .build());
+        refreshTokenRepository.save(refreshTokenEntity);
+        return refreshToken;
     }
 
     private boolean isTokenExpired(String token) {
@@ -66,14 +95,15 @@ public class JwtService {
         return extractClaims(token).getSubject();
     }
 
-    private boolean isRefreshTokenWithdrown(String refreshToken, String userName) {
-        RefreshTokenEntity token =  this.refreshTokenRepository.findById(userName).orElse(null);
-        return token == null || !token.getRefreshToken().equals(refreshToken);
+    @SuppressWarnings("unchecked")
+    public List<String> extractRoles(String token) {
+        Claims claims = extractClaims(token);
+        return claims.get("roles", List.class);
     }
 
     private boolean isAccessTokenWithdrown(String accessToken, String userName) {
-        AccessTokenEntity token =  this.accessTokenRepository.findById(userName).orElse(null);
-        return token == null || !token.getAccessToken().equals(accessToken);
+        AccessTokenEntity tokenEntity = this.accessTokenRepository.findById(userName).orElse(null);
+        return tokenEntity == null || !tokenEntity.getAccessToken().contains(accessToken);
     }
 
     private Claims extractClaims(String token) {

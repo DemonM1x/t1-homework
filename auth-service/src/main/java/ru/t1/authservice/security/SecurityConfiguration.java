@@ -13,15 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -34,22 +28,18 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Включаем CORS
-                .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(configurer -> configurer
                         .authenticationEntryPoint(
                                 (request, response, exception) ->
-                                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED))
-                        .accessDeniedHandler(
-                                (request, response, exception) -> response.setStatus(HttpServletResponse.SC_FORBIDDEN)))
+                                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)))
                 .authorizeHttpRequests(configurer -> configurer
-                        .requestMatchers("api/v1/auth/login",
-                                "api/v1/auth/register")
+                        .requestMatchers("/api/v1/auth/login",
+                                "/api/v1/auth/register")
                         .permitAll()
-                        .requestMatchers("api/v1/auth/admin")
+                        .requestMatchers("/api/v1/auth/admin/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("api/v1/auth/premium_user")
+                        .requestMatchers("/api/v1/auth/premium_user")
                         .hasRole("PREMIUM_USER")
                         .anyRequest()
                         .hasAnyRole("ADMIN", "PREMIUM_USER", "GUEST"))
@@ -58,22 +48,6 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4173",
-                "https://vad1mchk.github.io", "http://62.233.42.134")); // Разрешенный источник
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Разрешенные методы
-        configuration.setAllowedHeaders(List.of("*")); // Разрешенные заголовки
-        configuration.setAllowCredentials(true); // Поддержка кук и заголовков авторизации
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
 
     @Bean
     public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -86,8 +60,5 @@ public class SecurityConfiguration {
         auth.userDetailsService(userDetails).passwordEncoder(passwordEncoder);
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 }
