@@ -148,6 +148,7 @@ public class JwtService {
         accessTokenRepository.deleteById(username);
         refreshTokenRepository.deleteById(username);
     }
+
     public String getClientIpAddress(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {

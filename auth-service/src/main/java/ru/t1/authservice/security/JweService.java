@@ -80,8 +80,4 @@ public class JweService {
             throw new RuntimeException("Ошибка при дешифровании токена", e);
         }
     }
-
-    public String getEncryptionKeyBase64() {
-        return Base64.getEncoder().encodeToString(encryptionKey.getEncoded());
-    }
 }
