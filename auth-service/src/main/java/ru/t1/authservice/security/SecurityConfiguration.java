@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/api/v1/auth/admin/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("/api/v1/auth/premium_user")
+                        .requestMatchers("/api/v1/auth/premium")
                         .hasRole("PREMIUM_USER")
                         .anyRequest()
                         .hasAnyRole("ADMIN", "PREMIUM_USER", "GUEST"))

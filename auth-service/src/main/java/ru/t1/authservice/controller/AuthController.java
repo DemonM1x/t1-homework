@@ -54,7 +54,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("premium")
+    @GetMapping("/premium")
     public ResponseEntity<String> checkPremium(Authentication authentication) {
         return ResponseEntity.status(HttpStatus.OK).body(authentication.getName() + " you have premium");
     }
