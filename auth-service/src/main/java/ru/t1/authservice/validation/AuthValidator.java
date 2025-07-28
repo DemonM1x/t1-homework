@@ -10,6 +10,7 @@ public class AuthValidator {
         return username.length() >= 4 &&
                 username.matches("^[a-zA-Z_][a-zA-Z0-9_]*$");
     }
+
     public static boolean passwordValidation(String password) {
         return password.length() >= 6;
     }

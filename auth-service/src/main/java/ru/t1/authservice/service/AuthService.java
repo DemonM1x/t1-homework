@@ -16,8 +16,6 @@ import ru.t1.authservice.model.Role;
 import ru.t1.authservice.model.RoleEntity;
 import ru.t1.authservice.model.TokenType;
 import ru.t1.authservice.model.UserEntity;
-import ru.t1.authservice.repository.AccessTokenRepository;
-import ru.t1.authservice.repository.RefreshTokenRepository;
 import ru.t1.authservice.repository.UserRepository;
 import ru.t1.authservice.security.JwtService;
 import ru.t1.authservice.validation.AuthValidator;
@@ -31,8 +29,6 @@ import java.util.List;
 @Slf4j
 public class AuthService {
 
-    private final AccessTokenRepository accessTokenRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -40,28 +36,27 @@ public class AuthService {
 
     @Transactional
     public void register(RegistryRequestDto dto) {
-        if (!AuthValidator.authValidation(dto.getUsername(), dto.getPassword())){
+        if (!AuthValidator.authValidation(dto.getUsername(), dto.getPassword())) {
             throw new IllegalArgumentException("Invalid username or password");
         }
-        if (!EmailValidator.isValid(dto.getEmail())){
+        if (!EmailValidator.isValid(dto.getEmail())) {
             throw new IllegalArgumentException("Invalid email");
         }
         checkUserEmail(dto.getEmail());
         checkUsername(dto.getUsername());
         RoleEntity userRole;
-        if (dto.getEmail().contains("admin")){
+        if (dto.getEmail().contains("admin")) {
             userRole = RoleEntity.builder()
                     .role(Role.ADMIN)
                     .build();
-        }
-        else {
+        } else {
             userRole = RoleEntity.builder()
                     .role(Role.GUEST)
                     .build();
         }
         List<RoleEntity> roles = new ArrayList<>();
         roles.add(userRole);
-        UserEntity user =  buildUserEntity(dto);
+        UserEntity user = buildUserEntity(dto);
         user.setRoles(roles);
         userRepository.save(user);
         log.debug("Created user {}", user);
@@ -89,13 +84,13 @@ public class AuthService {
         jwtService.deleteAllTokens(username);
     }
 
-    public void givePremium(EmailRequestDto request){
+    public void givePremium(EmailRequestDto request) {
         UserEntity user = userRepository.findByEmailIgnoreCase(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email"));
         RoleEntity role = RoleEntity.builder()
                 .role(Role.PREMIUM_USER)
                 .build();
-        if (!user.getRoles().contains(role)){
+        if (!user.getRoles().contains(role)) {
             user.getRoles().add(role);
             userRepository.save(user);
         }
@@ -109,7 +104,7 @@ public class AuthService {
     }
 
     private void checkUsername(String username) {
-        if (userRepository.existsByUsernameIgnoreCase(username)){
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
     }

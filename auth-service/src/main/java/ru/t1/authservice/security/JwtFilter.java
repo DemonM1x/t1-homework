@@ -49,7 +49,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
                     List<String> roles = jwtService.extractRoles(jwt);
                     Collection<? extends GrantedAuthority> authorities;
-                    
+
                     if (roles != null && !roles.isEmpty()) {
                         authorities = roles.stream()
                                 .map(SimpleGrantedAuthority::new)
@@ -58,7 +58,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     } else {
                         authorities = userDetails.getAuthorities();
                     }
-                    
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
                             null, authorities);
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

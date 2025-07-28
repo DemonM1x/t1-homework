@@ -19,7 +19,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping( "/register")
+    @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody
                                          @Valid
                                          RegistryRequestDto dto) {
@@ -34,8 +34,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwsResponseDto> login(@RequestBody
-                                            @Valid
-                                            LoginRequestDto dto) {
+                                                @Valid
+                                                LoginRequestDto dto) {
         JwsResponseDto response = authService.login(dto);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -49,7 +49,7 @@ public class AuthController {
     @PostMapping("/admin/give/premium")
     public ResponseEntity<Void> givePremium(@RequestBody
                                             @Valid
-                                            EmailRequestDto dto)  {
+                                            EmailRequestDto dto) {
         authService.givePremium(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

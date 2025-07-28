@@ -75,8 +75,8 @@ public class JwtService {
         RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findById(user.getUsername())
                 .orElse(RefreshTokenEntity.builder()
                         .id(user.getUsername())
-                .refreshToken(refreshToken)
-                .build());
+                        .refreshToken(refreshToken)
+                        .build());
         refreshTokenRepository.save(refreshTokenEntity);
         return refreshToken;
     }
