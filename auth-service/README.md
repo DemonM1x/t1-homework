@@ -25,25 +25,25 @@ docker-container с postgres
 - Зарегистрируем гостя и админа
 - залогинемся в аккаунты
 
-![Postman](/img/img.png)
+![Postman](img/img.png)
 
-![Postman](/img/img_1.png)
+![Postman](img/img_1.png)
 
-![Postman](/img/img_2.png)
+![Postman](img/img_2.png)
 
 - Выдадим от администратара premium роль
 пользователю:
 
-![Postman](/img/img_3.png)
+![Postman](img/img_3.png)
 
 - Проверим, что пользователь получил права:
 
-![Postman](/img/img_4.png)
+![Postman](img/img_4.png)
 
 - Попытаемся получить сообщение
 о premium статусе до предоставления
 роли:
 
-![Postman](/img/img_5.png)
+![Postman](img/img_5.png)
 
 Получили ошибку с кодом 401
