@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-    private final JwtFilter jwtAuthenticationFilter;
+    private final JwtFilter jwtFilter;
     private final UserDetailsService userDetails;
     private final PasswordEncoder passwordEncoder;
 
@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                         .anyRequest()
                         .hasAnyRole("ADMIN", "PREMIUM_USER", "GUEST"))
                 .anonymous(AbstractHttpConfigurer::disable)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
