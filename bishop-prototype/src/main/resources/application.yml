@@ -1,0 +1,62 @@
+server:
+  port: 8085
+
+synth:
+  core:
+    audit:
+      mode: kafka
+      topic: bishop_topic
+
+spring:
+  application:
+    name: bishop-prototype
+  docker:
+    compose:
+      enabled: true
+      profiles:
+        active: zookeeper, kafka, kafka-ui, prometheus, grafana
+      stop:
+        command: down
+  kafka:
+    bootstrap-servers: localhost:19092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+
+management:
+  server:
+    port: ${server.port}
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - metrics
+          - prometheus
+          - env
+          - info
+          - heapdump
+          - threaddump
+
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    metrics:
+      tags:
+        application: ${spring.application.name}
+    jmx:
+      metrics:
+        export:
+          enabled: false
+    prometheus:
+      metrics:
+        export:
+          enabled: true
+          step: 1m
+
+  logging:
+    level:
+      "ru.t1": debug
