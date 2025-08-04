@@ -18,6 +18,7 @@ import ru.t1.authservice.model.TokenType;
 import ru.t1.authservice.model.UserEntity;
 import ru.t1.authservice.repository.UserRepository;
 import ru.t1.authservice.security.JwtService;
+import ru.t1.authservice.security.TokenSecurityService;
 import ru.t1.authservice.validation.AuthValidator;
 import ru.t1.authservice.validation.EmailValidator;
 
@@ -33,6 +34,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final TokenSecurityService tokenSecurityService;
 
     @Transactional
     public void register(RegistryRequestDto dto) {
@@ -63,7 +65,7 @@ public class AuthService {
 
     }
 
-    public JwsResponseDto login(LoginRequestDto dto) {
+    public JwsResponseDto login(LoginRequestDto dto, String clientIp, String userAgent) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         dto.getEmail(),
@@ -73,6 +75,11 @@ public class AuthService {
         UserEntity user = (UserEntity) authentication.getPrincipal();
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        String sessionId = tokenSecurityService.generateSecureToken(32);
+        tokenSecurityService.createUserSession(user.getUsername(), sessionId, clientIp, userAgent);
+
+        log.info("Успешный вход пользователя: {} с IP: {}", user.getUsername(), clientIp);
+
         return JwsResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -80,8 +87,23 @@ public class AuthService {
                 .build();
     }
 
-    public void logout(String username) {
+    public void logout(String username, String accessToken, String refreshToken) {
+        if (accessToken != null) {
+            String accessTokenHash = tokenSecurityService.createTokenHash(accessToken);
+            tokenSecurityService.blacklistToken(accessTokenHash, java.time.Duration.ofHours(1));
+        }
+
+        if (refreshToken != null) {
+            String refreshTokenHash = tokenSecurityService.createTokenHash(refreshToken);
+            tokenSecurityService.blacklistToken(refreshTokenHash, java.time.Duration.ofDays(1));
+        }
         jwtService.deleteAllTokens(username);
+        log.info("Пользователь {} вышел из системы", username);
+    }
+
+    public void revokeAllUserTokens(String username, String reason) {
+        jwtService.deleteAllTokens(username);
+        log.warn("Отозваны все токены пользователя: {} по причине: {}", username, reason);
     }
 
     public void givePremium(EmailRequestDto request) {
